@@ -1,0 +1,95 @@
+package com.micro.account_service.controller;
+
+
+import com.micro.account_service.dto.Subscription.*;
+import com.micro.account_service.service.PaymentProcessor;
+import com.micro.account_service.service.SubscriptionService;
+import com.stripe.exception.SignatureVerificationException;
+import com.stripe.model.Event;
+import com.stripe.model.EventDataObjectDeserializer;
+import com.stripe.model.StripeObject;
+import com.stripe.model.checkout.Session;
+import com.stripe.net.Webhook;
+import com.stripe.service.PlanService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+@RestController
+@RequiredArgsConstructor
+public class BillingController {
+
+    //private final PlanService planService;
+    private final SubscriptionService subscriptionService;
+    private final PaymentProcessor paymentProcessor;
+    @Value("${stripe.webhook}")
+    private  String webhookSecret;
+
+    @GetMapping("/api/plans")
+    public ResponseEntity<List<PlanResponse>>getAllPlans(){
+        return ResponseEntity.ok(List.of());
+    }
+
+    @GetMapping("/api/me/subscription")
+    public ResponseEntity<SubscriptionResponse>getMySubscription(){
+        Long userId = 1L;
+        return ResponseEntity.ok(subscriptionService.getCurrentMemberSubscription());
+    }
+
+    @PostMapping("/api/payments/checkout")
+    public ResponseEntity<CheckoutResponse>createCheckout(@RequestBody CheckoutRequest request){
+        return ResponseEntity.ok(paymentProcessor.createCheckoutSessionUrl(request));
+    }
+
+    @PostMapping("/api/payments/portal")
+    public ResponseEntity<PortalResponse>openPortal(){
+        Long userId = 1L;
+        return ResponseEntity.ok(paymentProcessor.openCustomPortal());
+    }
+
+    @PostMapping("/webhooks/payment")
+    public ResponseEntity<String> handlePaymentWebhooks(
+            @RequestBody String payload , @RequestHeader("Stripe-Signature") String signature
+
+    ){
+        try {
+            Event event = Webhook.constructEvent(payload , signature , webhookSecret);
+
+            EventDataObjectDeserializer deserializer = event.getDataObjectDeserializer();
+            StripeObject stripeObject = null;
+
+            if(deserializer.getObject().isPresent()){
+                stripeObject = deserializer.getObject().get();
+            }else{
+                try {
+                    stripeObject = deserializer.deserializeUnsafe();
+                    if(stripeObject == null){
+                        return ResponseEntity.ok().build();
+                    }
+                }catch (Exception e){
+                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Deserialization faild");
+                }
+            }
+
+            // process the de serialized event
+            Map<String , String >metadata = new HashMap<>();
+            if(stripeObject instanceof Session session){
+                metadata = ((Session) stripeObject).getMetadata();
+            }
+
+            paymentProcessor.handelWebhookEvent(event.getType() , stripeObject , metadata);
+            return ResponseEntity.ok().build();
+
+        } catch (SignatureVerificationException e) {
+            throw new RuntimeException(e);
+        }
+
+    }
+
+}

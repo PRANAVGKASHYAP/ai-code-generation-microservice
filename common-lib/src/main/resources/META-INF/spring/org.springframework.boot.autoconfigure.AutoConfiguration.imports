@@ -1,0 +1,2 @@
+com.micro.common_lib.security.SharedSecurityAutoConfiguration
+com.micro.common_lib.error.SharedGlobalExceptionHandler

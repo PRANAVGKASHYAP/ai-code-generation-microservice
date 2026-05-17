@@ -1,0 +1,14 @@
+logging:
+  level:
+    org.springframework.cloud.gateway: DEBUG
+    reactor.netty.http.client: DEBUG
+
+spring:
+  application:
+    name: api-gateway
+
+  config:
+    import: optional:configserver:${CONFIG_SERVER_URL:http://localhost:8888}
+
+
+# on kubernetes cluster the api gateway will not connect to local host but to a k8s network domain / service

@@ -1,0 +1,37 @@
+# Secrets and Environment Configs
+.env
+**/.env
+*.env.*
+
+# Java / Maven compiled outputs (FIXED: removed leading slashes for multi-module tracking)
+target/
+**/target/
+build/
+**/build/
+dist/
+
+# File extensions (FIXED: corrected wildcard syntax)
+*.class
+*.jar
+*.war
+*.ear
+
+# Local backup archives (NEW: Ignores all those root .zip files)
+*.zip
+*.tar.gz
+*.rar
+
+# IDE Settings & Tooling
+.idea/
+/.idea
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# OS temporary files
+Default/
+Thumbs.db
+.DS_Store
