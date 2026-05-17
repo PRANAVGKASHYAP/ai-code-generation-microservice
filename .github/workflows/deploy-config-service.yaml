@@ -52,6 +52,7 @@ jobs:
         with:
           cluster_name: ${{ secrets.GCP_CLUSTER }}
           location: ${{ secrets.GCP_ZONE }}
+          project_id: 'ai-code-generator-496513'
 
       - name: Deploy to GKE
         run: |
