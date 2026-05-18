@@ -10,6 +10,7 @@ public class IntellegenceServiceApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(IntellegenceServiceApplication.class, args);
+        // testing the workflow for intellegence service
 	}
 
 }
