@@ -20,7 +20,13 @@ public class CORSConfig {
 
         CorsConfiguration corsConfiguration = new CorsConfiguration();
 
-        corsConfiguration.setAllowedOrigins(Arrays.asList("http://localhost:5173" , "www.kashyapcode.in" , "kashyapcode.in"));
+        corsConfiguration.setAllowedOrigins(Arrays.asList(
+                "http://localhost:5173",
+                "http://kashyapcode.in",
+                "https://kashyapcode.in",
+                "http://www.kashyapcode.in",
+                "https://www.kashyapcode.in"
+        ));
         corsConfiguration.setMaxAge(3600L);
         corsConfiguration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS" , "PATCH"));
         corsConfiguration.setAllowedHeaders(Arrays.asList("*"));
