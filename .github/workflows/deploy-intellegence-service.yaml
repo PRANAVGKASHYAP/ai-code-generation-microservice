@@ -1,0 +1,70 @@
+name: Deploy Intelligence Service
+
+on:
+  push:
+    branches:
+      - main # ✅ Pre-fixed for your main branch
+    paths:
+      - 'intellegence-service/**' # ✅ Filters to run only on intelligence service changes
+  workflow_dispatch: # ✅ Includes the manual UI button for easy testing
+
+env:
+  SERVICE_NAME: intellegence-service
+  IMAGE_NAME: pranavgk2003/llm_apps_intellegence-service
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  build-and-deploy:
+    name: Build, Push, and Deploy to GKE
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Build and Install Common Lib # ✅ FIXED: Aligned indentation perfectly and fixed spelling
+        working-directory: ./common-lib
+        run: |
+          chmod +x ./mvnw
+          ./mvnw clean install -DskipTests
+
+      - name: Build and Push Docker Image with Jib
+        working-directory: ./${{ env.SERVICE_NAME }}
+        run: |
+          chmod +x ./mvnw # ✅ Pre-fixed to prevent Linux permission execution errors (126)
+          ./mvnw compile jib:build \
+            -Djib.to.image=docker.io/${{ env.IMAGE_NAME }}:${{ github.sha }} \
+            -Djib.to.tags=latest \
+            -Djib.to.auth.username=${{ secrets.DOCKERHUB_USERNAME }} \
+            -Djib.to.auth.password=${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: '${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}'
+          service_account: '${{ secrets.GCP_SERVICE_ACCOUNT }}'
+
+      - name: Get GKE Credentials
+        uses: google-github-actions/get-gke-credentials@v2
+        with:
+          cluster_name: ${{ secrets.GCP_CLUSTER }}
+          location: ${{ secrets.GCP_ZONE }}
+          project_id: ${{ secrets.GCP_PROJECT }} # ✅ Pre-fixed project context for keyless access
+
+      - name: Deploy to GKE
+        run: |
+          kubectl set image deployment/${{ env.SERVICE_NAME }} \
+          ${{ env.SERVICE_NAME }}=${{ env.IMAGE_NAME }}:${{ github.sha }} \
+          -n ai-apps # ✅ Pre-fixed to target your active 'ai-apps' namespace
+          
+          kubectl rollout status deployment/${{ env.SERVICE_NAME }} -n ai-apps
