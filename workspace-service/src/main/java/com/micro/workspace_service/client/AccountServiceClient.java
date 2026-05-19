@@ -20,6 +20,6 @@ public interface AccountServiceClient{
     @GetMapping("internal/v1/billing/current-plan")
     public PlanDTO getCurrentPlan();
 
-    @GetMapping("internal/v1//user/{id}")
+    @GetMapping("internal/v1/user/{id}")
     public UserDTO getUserById(@PathVariable Long id);
 }
