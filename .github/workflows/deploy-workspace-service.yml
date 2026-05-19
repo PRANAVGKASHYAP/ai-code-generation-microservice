@@ -5,13 +5,13 @@ on:
     branches:
       - main
     paths:
-      - 'workspace-service/**' # ✅ Runs only when code inside the workspace folder changes
+      - 'workspace-service/**'
       - '.github/workflows/deploy-workspace.yaml'
-  workflow_dispatch: # Allows you to manually trigger this build from GitHub if needed
+  workflow_dispatch:
 
 env:
   SERVICE_NAME: workspace-service
-  IMAGE_NAME: pranavgk2003/llm_apps_workspace-service # ✅ Maps to your Docker Hub repository
+  IMAGE_NAME: pranavgk2003/llm_apps_workspace-service
 
 permissions:
   id-token: write
@@ -31,12 +31,20 @@ jobs:
         with:
           java-version: '17'
           distribution: 'temurin'
-          cache: 'maven' # Caches dependencies to make future builds blazing fast
+          cache: 'maven'
+
+      # ✅ NEW: Compiles and caches the common library using the Maven Wrapper pattern
+      - name: Build and Install Common Lib
+        working-directory: ./common-lib
+        run: |
+          chmod +x ./mvnw
+          ./mvnw clean install -DskipTests
 
       - name: Build with Maven
+        working-directory: ./workspace-service
         run: |
-          cd workspace-service
-          mvn clean package -DskipTests # Packages your Spring Boot app into a bootable JAR
+          chmod +x ./mvnw
+          ./mvnw clean package -DskipTests
 
       - name: Log in to Docker Hub
         uses: docker/login-action@v3
@@ -50,7 +58,7 @@ jobs:
       - name: Build and Push Docker Image
         uses: docker/build-push-action@v5
         with:
-          context: ./workspace-service # ✅ Sets execution context inside the service root
+          context: ./workspace-service
           file: ./workspace-service/Dockerfile
           push: true
           tags: |
@@ -74,10 +82,8 @@ jobs:
 
       - name: Deploy to GKE
         run: |
-          # ✅ Explicitly updates the running container image to use the new unique Commit SHA tag
           kubectl set image deployment/${{ env.SERVICE_NAME }} \
           ${{ env.SERVICE_NAME }}=docker.io/${{ env.IMAGE_NAME }}:${{ github.sha }} \
           -n ai-apps
           
-          # Watch the rollout until it successfully scales up the new version and cleans up the old one
           kubectl rollout status deployment/${{ env.SERVICE_NAME }} -n ai-apps
