@@ -1,0 +1,71 @@
+name: Deploy Frontend UI Service
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'ui/**' # ✅ Triggers only when you update your frontend assets
+      - '.github/workflows/deploy-ui.yaml'
+  workflow_dispatch: # Allows manual pipeline execution from the GitHub Web UI
+
+env:
+  SERVICE_NAME: lovable-frontend
+  IMAGE_NAME: pranavgk2003/lobable-frontend # ✅ Matches your exact typo-specific DockerHub repo name
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  build-and-deploy:
+    name: Build, Push, and Deploy UI to GKE
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and Push Docker Image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./ui # ✅ Pointed directly to your newly created lowercase folder
+          file: ./ui/Dockerfile
+          push: true
+          tags: |
+            docker.io/${{ env.IMAGE_NAME }}:${{ github.sha }}
+            docker.io/${{ env.IMAGE_NAME }}:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: '${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}'
+          service_account: '${{ secrets.GCP_SERVICE_ACCOUNT }}'
+
+      - name: Get GKE Credentials
+        uses: google-github-actions/get-gke-credentials@v2
+        with:
+          cluster_name: ${{ secrets.GCP_CLUSTER }}
+          location: ${{ secrets.GCP_ZONE }}
+          project_id: ${{ secrets.GCP_PROJECT }}
+
+      - name: Deploy to GKE
+        run: |
+          # ✅ Explicitly forcing GKE to rollout by tracking the unique Git Commit SHA
+          kubectl set image deployment/${{ env.SERVICE_NAME }} \
+          ${{ env.SERVICE_NAME }}=docker.io/${{ env.IMAGE_NAME }}:${{ github.sha }} \
+          -n ai-apps
+          
+          # Watch and confirm the rolling update succeeds completely
+          kubectl rollout status deployment/${{ env.SERVICE_NAME }} -n ai-apps
