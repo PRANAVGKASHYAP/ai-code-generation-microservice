@@ -6,12 +6,12 @@ on:
       - main
     paths:
       - 'workspace-service/**'
-      - '.github/workflows/deploy-workspace-service.yaml'
+      - '.github/workflows/deploy-workspace.yaml'
   workflow_dispatch:
 
 env:
   SERVICE_NAME: workspace-service
-  IMAGE_NAME: pranavgk2003/llm_apps_workspace-service
+  IMAGE_NAME: pranavgk2003/workspace-service # 💡 Swapped to your workspace repo name
 
 permissions:
   id-token: write
@@ -19,53 +19,35 @@ permissions:
 
 jobs:
   build-and-deploy:
-    name: Build, Package, and Deploy Workspace Service
+    name: Build, Push, and Deploy to GKE
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Set up JDK 21
+      - name: Set up JDK 21 # 💡 Uses JDK 21 exactly like the working lib setup
         uses: actions/setup-java@v4
         with:
           java-version: '21'
           distribution: 'temurin'
-          cache: 'maven'
+          cache: maven
 
-      # ✅ NEW: Compiles and caches the common library using the Maven Wrapper pattern
       - name: Build and Install Common Lib
         working-directory: ./common-lib
         run: |
           chmod +x ./mvnw
           ./mvnw clean install -DskipTests
 
-      - name: Build with Maven
-        working-directory: ./workspace-service
+      - name: Build and Push Docker Image with Jib
+        working-directory: ./${{ env.SERVICE_NAME }}
         run: |
           chmod +x ./mvnw
-          ./mvnw clean package -DskipTests
-
-      - name: Log in to Docker Hub
-        uses: docker/login-action@v3
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      - name: Build and Push Docker Image
-        uses: docker/build-push-action@v5
-        with:
-          context: ./workspace-service
-          file: ./workspace-service/Dockerfile
-          push: true
-          tags: |
-            docker.io/${{ env.IMAGE_NAME }}:${{ github.sha }}
-            docker.io/${{ env.IMAGE_NAME }}:latest
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          ./mvnw compile jib:build \
+            -Djib.to.image=docker.io/${{ env.IMAGE_NAME }}:${{ github.sha }} \
+            -Djib.to.tags=latest \
+            -Djib.to.auth.username=${{ secrets.DOCKERHUB_USERNAME }} \
+            -Djib.to.auth.password=${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Authenticate to Google Cloud
         uses: google-github-actions/auth@v2
@@ -83,7 +65,7 @@ jobs:
       - name: Deploy to GKE
         run: |
           kubectl set image deployment/${{ env.SERVICE_NAME }} \
-          ${{ env.SERVICE_NAME }}=docker.io/${{ env.IMAGE_NAME }}:${{ github.sha }} \
+          ${{ env.SERVICE_NAME }}=${{ env.IMAGE_NAME }}:${{ github.sha }} \
           -n ai-apps
           
           kubectl rollout status deployment/${{ env.SERVICE_NAME }} -n ai-apps
