@@ -32,6 +32,7 @@ public class WorkspaceSecurityService {
                 .addFilterBefore(filter , UsernamePasswordAuthenticationFilter.class);
         //.formLogin(ele -> ele.disable());
         return httpSecurity.build();
+
     }
 
 
