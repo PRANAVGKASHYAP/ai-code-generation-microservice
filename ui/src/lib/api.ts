@@ -293,7 +293,7 @@ export const api = {
   },
 
   async getChatHistory(projectId: string): Promise<ChatMessage[]> {
-    const response = await fetch(`${BASE_URL}/api/v1/intelligence/chat/projects/${projectId}`, {
+    const response = await fetch(`${BASE_URL}/api/v1/intellegence/chat/projects/${projectId}`, {
       headers: { ...getAuthHeaders() },
     });
 
@@ -314,7 +314,7 @@ export const api = {
   ) {
     const controller = new AbortController();
 
-    fetch(`${BASE_URL}/api/v1/intelligence/chat/stream`, {
+    fetch(`${BASE_URL}/api/v1/intellegence/chat/stream`, {
       method: "POST",
       headers: { "Content-Type": "application/json", ...getAuthHeaders() },
       body: JSON.stringify({ message, projectId }),
