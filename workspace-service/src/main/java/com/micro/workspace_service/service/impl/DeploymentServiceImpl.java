@@ -45,7 +45,7 @@ public class DeploymentServiceImpl implements DeploymentService {
     @Override
     public DeployResponse deploy(Long projectId) {
 
-        String domain = "project-" + projectId + "app.domain.com";
+        String domain = "project-" + projectId + "previews.kashyapcode.in";
 
         // first get the pod that is active and check if this app is already running on that pod or not
         Pod currPod = findExistingAndActivePod(projectId);
