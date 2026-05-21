@@ -113,7 +113,7 @@ public class DeploymentServiceImpl implements DeploymentService {
 
         String startCommand ="npm install && nohup npm run dev -- --host 0.0.0.0 --port 5173 > /app/dev.log 2>&1 &";
         execCommand(podName , "runner" , "sh" , "-c" , startCommand);
-        String domain = "project-" + projectId + "app.domain.com";
+        String domain = "project-" + projectId + "previews.kashyapcode.in";
         registerRoute(activePod , domain);
         return new DeployResponse("http://" + domain + ":8090");
 
