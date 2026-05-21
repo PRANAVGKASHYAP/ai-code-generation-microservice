@@ -15,7 +15,7 @@ public class FileController {
 
     private final FileService fileService;
 
-    @GetMapping("/tree")
+    @GetMapping
     public ResponseEntity<FileTreeResponse> getFileTree(
             @PathVariable("projectId") Long projectId // MUST have "projectId" in the annotation
     ) {
