@@ -193,7 +193,7 @@ public class DeploymentServiceImpl implements DeploymentService {
     private String namespace = "lovable-previews";
 
 
-    private String baseDomain = "kashyapcode.in";
+    private String baseDomain = "previews.kashyapcode.in";
 
 
     private String proxyPort = "80";
