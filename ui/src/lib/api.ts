@@ -1,4 +1,4 @@
-import { ChatMessage, DeployResponse, FileNode, LoginCredentials, LoginResponse, ProjectSummaryResponse, ProjectRequest, ProjectResponse, ProjectMember, ProjectRole, SignupRequest, AuthResponse } from "./types";
+import { ChatMessage, DeployResponse, FileNode, LoginCredentials, LoginResponse, ProjectSummaryResponse, ProjectRequest, ProjectResponse, ProjectMember, ProjectRole, SignupRequest, AuthResponse, SubscriptionResponse, CheckoutResponse, PortalResponse, PaymentVerification } from "./types";
 
 const BASE_URL = import.meta.env.VITE_API_URL || "http://api.kashyapcode.in";
 
@@ -392,6 +392,63 @@ export const api = {
       });
 
     return () => controller.abort();
+  },
+
+  async getSubscription(): Promise<SubscriptionResponse> {
+    const response = await fetch(`${BASE_URL}/api/v1/account/me/subscription`, {
+      headers: { ...getAuthHeaders() },
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to fetch subscription status");
+    }
+
+    return response.json();
+  },
+
+  async createCheckout(planId: number): Promise<CheckoutResponse> {
+    const response = await fetch(`${BASE_URL}/api/v1/account/payments/checkout`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        ...getAuthHeaders(),
+      },
+      body: JSON.stringify({ planId }),
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to initiate checkout");
+    }
+
+    return response.json();
+  },
+
+  async createPortalSession(): Promise<PortalResponse> {
+    const response = await fetch(`${BASE_URL}/api/v1/account/payments/portal`, {
+      method: "POST",
+      headers: { ...getAuthHeaders() },
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to initiate portal session");
+    }
+
+    return response.json();
+  },
+
+  async verifyPayment(sessionId: string): Promise<PaymentVerification> {
+    const response = await fetch(
+      `${BASE_URL}/api/v1/account/payments/verify?session_id=${sessionId}`,
+      {
+        headers: { ...getAuthHeaders() },
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error("Payment verification failed");
+    }
+
+    return response.json();
   }
 
 };

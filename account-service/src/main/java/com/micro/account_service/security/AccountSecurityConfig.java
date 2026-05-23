@@ -19,7 +19,7 @@ public class AccountSecurityConfig {
     private JwtFilter filter;
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
-
+        // http://localhost:8080/api/v1/account/payments/checkout
         httpSecurity
                 .csrf(config -> config.disable())
                 .cors(Customizer.withDefaults())

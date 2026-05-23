@@ -31,25 +31,23 @@ public class BillingController {
     @Value("${stripe.webhook}")
     private  String webhookSecret;
 
-    @GetMapping("/api/plans")
+    @GetMapping("/plans")
     public ResponseEntity<List<PlanResponse>>getAllPlans(){
         return ResponseEntity.ok(List.of());
     }
 
-    @GetMapping("/api/me/subscription")
+    @GetMapping("/me/subscription")
     public ResponseEntity<SubscriptionResponse>getMySubscription(){
-        Long userId = 1L;
         return ResponseEntity.ok(subscriptionService.getCurrentMemberSubscription());
     }
 
-    @PostMapping("/api/payments/checkout")
+    @PostMapping("/payments/checkout")
     public ResponseEntity<CheckoutResponse>createCheckout(@RequestBody CheckoutRequest request){
         return ResponseEntity.ok(paymentProcessor.createCheckoutSessionUrl(request));
     }
 
-    @PostMapping("/api/payments/portal")
+    @PostMapping("/payments/portal")
     public ResponseEntity<PortalResponse>openPortal(){
-        Long userId = 1L;
         return ResponseEntity.ok(paymentProcessor.openCustomPortal());
     }
 
@@ -90,6 +88,11 @@ public class BillingController {
             throw new RuntimeException(e);
         }
 
+    }
+
+    @GetMapping("/payments/verify")
+    public ResponseEntity<PaymentVerification> verifyUserPayment(@RequestParam("session_id") String sessionId) {
+        return ResponseEntity.ok(paymentProcessor.verifyPayment(sessionId));
     }
 
 }

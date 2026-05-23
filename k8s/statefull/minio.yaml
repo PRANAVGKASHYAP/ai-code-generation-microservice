@@ -24,12 +24,12 @@ spec:
             - containerPort: 9000
             - containerPort: 9001
           env:
-            - name: MINIO_USER
+            - name: MINIO_ROOT_USER
               valueFrom:
                 secretKeyRef:
                   name: app-secrets
                   key: MINIO_USER
-            - name: MINIO_PASSWORD
+            - name: MINIO_ROOT_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: app-secrets

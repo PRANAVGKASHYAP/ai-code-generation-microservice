@@ -106,3 +106,35 @@ export interface AuthResponse {
     plan?: any;
   };
 }
+
+export interface PlanResponse {
+  id: number | null;
+  name: string;
+  maxProjects?: number;
+  maxTokensPerDay?: number;
+  unlimitedAi?: boolean;
+}
+
+export interface SubscriptionResponse {
+  plan: PlanResponse | null;
+  status: string;
+  currentPeriodEnd?: string;
+  tokensUsedThisCycle?: number;
+}
+
+export interface CheckoutRequest {
+  planId: number;
+}
+
+export interface CheckoutResponse {
+  url: string;
+}
+
+export interface PortalResponse {
+  url: string;
+}
+
+export interface PaymentVerification {
+  customerEmail: string;
+  status: string;
+}

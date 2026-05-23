@@ -3,6 +3,7 @@ package com.micro.account_service.service.impl;
 
 import com.micro.account_service.dto.Subscription.CheckoutRequest;
 import com.micro.account_service.dto.Subscription.CheckoutResponse;
+import com.micro.account_service.dto.Subscription.PaymentVerification;
 import com.micro.account_service.dto.Subscription.PortalResponse;
 import com.micro.account_service.entity.User;
 import com.micro.account_service.repository.PlanRepository;
@@ -56,7 +57,7 @@ public class PaymentProcessorImpl implements PaymentProcessor {
         User user = userRepository.findById(userId).orElseThrow(()->new ResourceNotFoundException("user not found"));
 
 
-        // creating checkout session with stripe to redurect teh user to that url
+        // creating checkout session with stripe to redirect the user to that url
         var params = SessionCreateParams.builder()
                 .addLineItem(
                         SessionCreateParams.LineItem.builder().setPrice(
@@ -70,8 +71,8 @@ public class PaymentProcessorImpl implements PaymentProcessor {
                                         .build())
                                 .build()
                 )
-                .setSuccessUrl(successUrl + "/success.html?session_id={CHECKOUT_SESSION_ID}")
-                .setCancelUrl(successUrl + "/cancel.html")
+                .setSuccessUrl(successUrl + "/success?session_id={CHECKOUT_SESSION_ID}")
+                .setCancelUrl(successUrl + "/cancel")
                 .putMetadata("user_id" , userId.toString())
                 .putMetadata("plan_id" , request.planId().toString());
         try {
@@ -95,7 +96,7 @@ public class PaymentProcessorImpl implements PaymentProcessor {
                 () -> new ResourceNotFoundException("User with the id does not exist ")
         );
         String stripeCustomerId = user.getStripeCustomerId();
-        if(stripeCustomerId.isEmpty()){
+        if(stripeCustomerId == null || stripeCustomerId.isEmpty()){
             throw new BadRequestException("The stripe customer id is not present for this use");
         }
 
@@ -125,6 +126,19 @@ public class PaymentProcessorImpl implements PaymentProcessor {
             case "customer.subscription.updated" -> handelCustomerSubscriptionUpdated((Subscription) stripeObject); // this can mean a plan change
             case "customer.subscription.deleted" -> handelCustomerSubscriptionDeleted((Subscription) stripeObject);
             default -> log.debug("Ignoring the event {}" , type);
+        }
+    }
+
+    @Override
+    public PaymentVerification verifyPayment(String session_id) {
+        // this method is to verify the payment using the session id
+        try {
+            Session session = Session.retrieve(session_id);
+            String usermail = session.getCustomerDetails() != null ?session.getCustomerDetails().getEmail() : session.getCustomerEmail() ;
+            String status = session.getPaymentStatus();
+            return new PaymentVerification(usermail , status);
+        } catch (StripeException e) {
+            throw new BadRequestException("Cannot verify the subscription with the given session id ");
         }
     }
 

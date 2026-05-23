@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Plus, LogOut, Search, Folder, Loader2, MoreVertical, Trash, Download, Edit } from "lucide-react";
+import { Plus, LogOut, Search, Folder, Loader2, MoreVertical, Trash, Download, Edit, CreditCard } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -176,6 +176,10 @@ export function ProjectsDashboard() {
                                     {getUserInfo()?.username || ""}
                                 </p>
                             </div>
+                            <DropdownMenuItem onClick={() => navigate("/settings")} className="cursor-pointer">
+                                <CreditCard className="w-4 h-4 mr-2" />
+                                Billing & Settings
+                            </DropdownMenuItem>
                             <DropdownMenuItem onClick={handleLogout} className="text-red-600 focus:text-red-600 cursor-pointer">
                                 <LogOut className="w-4 h-4 mr-2" />
                                 Sign Out
