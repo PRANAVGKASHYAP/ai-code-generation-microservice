@@ -56,6 +56,9 @@ public class BillingController {
             @RequestBody String payload , @RequestHeader("Stripe-Signature") String signature
 
     ){
+        System.out.println("Secret length: " + webhookSecret.length());
+        System.out.println("Does it end with \\r? " + webhookSecret.endsWith("\r"));
+        System.out.println("Does it end with \\n? " + webhookSecret.endsWith("\n"));
         try {
             Event event = Webhook.constructEvent(payload , signature , webhookSecret);
 
