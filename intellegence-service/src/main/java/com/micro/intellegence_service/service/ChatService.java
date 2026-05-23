@@ -1,7 +1,8 @@
 package com.micro.intellegence_service.service;
 
 
-import org.springframework.ai.chat.model.ChatResponse;
+
+import com.micro.intellegence_service.dto.ChatResponse;
 
 import java.util.List;
 

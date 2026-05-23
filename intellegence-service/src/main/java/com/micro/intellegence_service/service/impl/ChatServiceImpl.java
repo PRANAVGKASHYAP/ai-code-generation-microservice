@@ -2,6 +2,7 @@ package com.micro.intellegence_service.service.impl;
 
 
 import com.micro.common_lib.security.AuthUtil;
+import com.micro.intellegence_service.dto.ChatResponse;
 import com.micro.intellegence_service.entity.ChatMessage;
 import com.micro.intellegence_service.entity.ChatSession;
 import com.micro.intellegence_service.entity.ChatSessionId;
@@ -10,7 +11,6 @@ import com.micro.intellegence_service.repository.ChatMessageReopsitory;
 import com.micro.intellegence_service.repository.ChatSessionRepository;
 import com.micro.intellegence_service.service.ChatService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

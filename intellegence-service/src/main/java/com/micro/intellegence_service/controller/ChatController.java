@@ -3,10 +3,10 @@ package com.micro.intellegence_service.controller;
 
 
 import com.micro.intellegence_service.dto.ChatRequest;
+import com.micro.intellegence_service.dto.ChatResponse;
 import com.micro.intellegence_service.service.AiGenerationService;
 import com.micro.intellegence_service.service.ChatService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.codec.ServerSentEvent;
