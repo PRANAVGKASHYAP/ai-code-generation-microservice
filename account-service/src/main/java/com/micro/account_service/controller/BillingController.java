@@ -28,7 +28,7 @@ public class BillingController {
     //private final PlanService planService;
     private final SubscriptionService subscriptionService;
     private final PaymentProcessor paymentProcessor;
-    @Value("${stripe.webhook}")
+    @Value("${stripe.webhook.secret}")
     private  String webhookSecret;
 
     @GetMapping("/plans")
