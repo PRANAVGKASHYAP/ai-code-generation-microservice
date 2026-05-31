@@ -31,4 +31,6 @@ public interface SubscriptionService {
     PlanDTO getCurrentSubscribedPlanByUser();
 
     //boolean canCreateNewProject();
+    // adding a method to get the total tokens used
+    Long getTotalTokenUsage();
 }

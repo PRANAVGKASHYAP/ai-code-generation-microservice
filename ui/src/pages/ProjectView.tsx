@@ -89,7 +89,7 @@ export function ProjectView() {
   const handleLogout = () => {
     removeAuthToken();
     removeUserInfo();
-    navigate("/login");
+    navigate("/");
   };
 
   const handleSendMessage = useCallback((content: string) => {

@@ -1,6 +1,7 @@
 package com.micro.account_service.service.impl;
 
 
+import com.micro.account_service.client.IntellegenceServiceClient;
 import com.micro.account_service.dto.Subscription.CheckoutRequest;
 import com.micro.account_service.dto.Subscription.CheckoutResponse;
 import com.micro.account_service.dto.Subscription.PortalResponse;
@@ -20,7 +21,6 @@ import com.micro.common_lib.security.AuthUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-
 import java.time.Instant;
 import java.util.Objects;
 import java.util.Set;
@@ -36,6 +36,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     private final PlanRepository planRepository;
     private final SubscriptionMapper mapper;
     //private final ProjectMemberRepository projectMemberRepository;
+    private final IntellegenceServiceClient intellegenceServiceClient;
 
     @Override
     public SubscriptionResponse getCurrentMemberSubscription() {
@@ -43,9 +44,16 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         Subscription currentSub =  subRepository.findByUserIdAndStatusIn(userId , Set.of(
                 SubscriptionStatus.ACTIVE , SubscriptionStatus.PAST_DUE , SubscriptionStatus.TRAILING
         )).orElse( new Subscription());
-
+        // need a method to get total tokens used
         return mapper.toSubscriptionResponse(currentSub);
     }
+
+    // creating a saperate method to return the total tokes used
+    public Long getTotalTokenUsage(){
+        Long userId = authUtil.getCurrentUserId();
+        return intellegenceServiceClient.getTotalTokenUsage();
+    }
+
 
     @Override
     public CheckoutResponse createCheckoutSessionUrl(CheckoutRequest request) {

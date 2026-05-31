@@ -28,7 +28,7 @@ public class BillingController {
     //private final PlanService planService;
     private final SubscriptionService subscriptionService;
     private final PaymentProcessor paymentProcessor;
-    @Value("${stripe.webhook.secret}")
+    @Value("${stripe.webhook}")
     private  String webhookSecret;
 
     @GetMapping("/plans")
@@ -96,6 +96,12 @@ public class BillingController {
     @GetMapping("/payments/verify")
     public ResponseEntity<PaymentVerification> verifyUserPayment(@RequestParam("session_id") String sessionId) {
         return ResponseEntity.ok(paymentProcessor.verifyPayment(sessionId));
+    }
+
+    // adding a saperate get mapping to find the total tokens used
+    @GetMapping("/me/tokens")
+    public ResponseEntity<Long> getTotalTokensUsed() {
+        return ResponseEntity.ok(subscriptionService.getTotalTokenUsage());
     }
 
 }

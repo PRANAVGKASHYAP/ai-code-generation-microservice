@@ -449,6 +449,19 @@ export const api = {
     }
 
     return response.json();
+  },
+
+  async getTokensUsed(): Promise<number> {
+    const response = await fetch(`${BASE_URL}/api/v1/account/me/tokens`, {
+      headers: { ...getAuthHeaders() },
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to fetch token usage");
+    }
+
+    const text = await response.text();
+    return Number(text);
   }
 
 };

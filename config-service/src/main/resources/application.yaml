@@ -8,7 +8,7 @@ spring:
         git:
           uri: https://github.com/PRANAVGKASHYAP/microservice-config-server.git
           username: PRANAVGKASHYAP
-          password: ${GIT_PASSWORD}
+          password: ${GITHUB_PAT}
           default-label: main
           clone-on-start: true
 

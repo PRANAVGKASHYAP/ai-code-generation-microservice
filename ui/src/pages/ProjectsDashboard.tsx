@@ -132,7 +132,7 @@ export function ProjectsDashboard() {
     const handleLogout = () => {
         removeAuthToken();
         removeUserInfo();
-        navigate("/login");
+        navigate("/");
     };
 
     const filteredProjects = projects.filter((project) => {
